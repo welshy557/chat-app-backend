@@ -10,10 +10,6 @@ export default function sendFriendMessage(socket: Socket) {
       message: message.message,
     });
 
-    socket.to(room).emit("recieveMessage", {
-      userId: socket.handshake.auth.user.id,
-      friendId: message.friendId,
-      message: message.message,
-    });
+    socket.to(room).emit("recieveMessage", "friend");
   });
 }
