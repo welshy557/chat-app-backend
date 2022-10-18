@@ -18,7 +18,9 @@ auth.post("/login", async (req, res) => {
       const token = jwt.sign(payload, process.env.JWT_SECRET_KEY as string, {
         expiresIn: "24h",
       });
-      return res.status(200).send({ token });
+      return res
+        .status(200)
+        .send({ token, user: { ...user, password: undefined } });
     }
 
     res.status(403).send("Invalid email/password");

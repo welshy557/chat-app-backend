@@ -1,10 +1,10 @@
 import { Socket } from "socket.io";
 import { Message } from "../socketModels";
 import db from "../db/db";
-import bcrypt from "bcrypt";
 
-export default function sendMessage(socket: Socket) {
-  socket.on("sendMessage", async (message: Message, room: string) => {
+export default function sendFriendMessage(socket: Socket) {
+  socket.on("sendFriendMessage", async (message: Message, room: string) => {
+    console.log("user", socket.handshake.auth.user);
     socket.to(room).emit("recieveMessage", {
       userId: socket.handshake.auth.user.id,
       friendId: message.friendId,

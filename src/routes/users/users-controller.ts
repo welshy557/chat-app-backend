@@ -1,6 +1,5 @@
-import express, { Response, Request } from "express";
+import express, { Response } from "express";
 import bcrypt from "bcrypt";
-
 import authenticateToken from "../../routeMiddleware/auth-token";
 import db from "../../db/db";
 import { ApiRequest } from "../..";
@@ -59,24 +58,6 @@ user.get("/users/:id", async (req: ApiRequest, res: Response) => {
     res.status(500).send(err);
   }
 });
-
-user.get(
-  "/loggedIn",
-  authenticateToken,
-  async (req: ApiRequest, res: Response) => {
-    try {
-      res.status(200).send({
-        id: req?.user?.id,
-        firstName: req.user?.firstName,
-        lastName: req.user?.lastName,
-        email: req.user?.email,
-      });
-    } catch (err) {
-      console.log(err);
-      res.status(500).send(err);
-    }
-  }
-);
 
 user.post("/users", async (req: ApiRequest, res: Response) => {
   try {

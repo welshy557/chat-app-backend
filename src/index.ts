@@ -4,7 +4,7 @@ import { Server } from "socket.io";
 import cors from "cors";
 import { User } from "./dbModels";
 import { Request } from "express";
-import sendMessage from "./socket/sendMessage";
+import sendFriendMessage from "./socket/sendFriendMessage";
 import friends from "./routes/friends";
 import user from "./routes/users/users-controller";
 import message from "./routes/messages";
@@ -12,6 +12,9 @@ import auth from "./routes/auth";
 import authenticateToken from "./socketMiddleware/auth-token";
 import friendRequests from "./routes/friendRequests";
 import socketFriendRequests from "./socket/friendRequests";
+import groups from "./routes/groups";
+import sendGroupMessage from "./socket/sendGroupMessage";
+import joinGroupRoom from "./socket/joinGroupRoom";
 
 export interface ApiRequest extends Request {
   user?: User;
@@ -35,6 +38,7 @@ app.use(friends);
 app.use(friendRequests);
 app.use(message);
 app.use(auth);
+app.use(groups);
 
 const server = http.createServer(app);
 
@@ -54,7 +58,9 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
   console.log(`Connected with ID: ${socket.id}`);
   socket.join(socket.handshake.auth.user.id.toString());
-  sendMessage(socket);
+  sendFriendMessage(socket);
+  sendGroupMessage(socket);
+  joinGroupRoom(socket);
   socketFriendRequests(socket);
 });
 
