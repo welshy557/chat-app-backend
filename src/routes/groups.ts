@@ -117,6 +117,7 @@ groups.delete(
         const group: Group | undefined = await trx<Group>("groups")
           .first()
           .where({ id: parseInt(req.params.groupId) });
+
         if (!group) {
           console.error(`Group with id ${req.params.groupId} not found`);
           res.status(404).send(`Group with id ${req.params.groupId} not found`);
@@ -144,12 +145,13 @@ groups.delete(
   async (req: ApiRequest, res: Response) => {
     try {
       await db.transaction(async (trx) => {
-        await trx<Group>("groups")
-          .delete()
-          .where({ id: parseInt(req.params.id) });
         await trx<Message>("messages")
           .delete()
           .where({ groupId: parseInt(req.params.id) });
+
+        await trx<Group>("groups")
+          .delete()
+          .where({ id: parseInt(req.params.id) });
       });
 
       res.status(200).send("Success");
