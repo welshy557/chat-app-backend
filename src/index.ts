@@ -15,6 +15,7 @@ import socketFriendRequests from "./socket/friendRequests";
 import groups from "./routes/groups";
 import sendGroupMessage from "./socket/sendGroupMessage";
 import joinGroupRoom from "./socket/joinGroupRoom";
+import refetchGroup from "./socket/refetchGroups";
 
 export interface ApiRequest extends Request {
   user?: User;
@@ -62,6 +63,7 @@ io.on("connection", (socket) => {
   sendGroupMessage(socket);
   joinGroupRoom(socket);
   socketFriendRequests(socket);
+  refetchGroup(socket);
 });
 
 io.use(authenticateToken);

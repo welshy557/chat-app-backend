@@ -5,7 +5,8 @@ import db from "../db/db";
 export default function sendGroupMessage(socket: Socket) {
   socket.on("sendGroupMessage", async (message: Message, room: string) => {
     await db("messages").insert({
-      userId: socket.handshake.auth.user.id,
+      userId:
+        message.userId === 1 ? message.userId : socket.handshake.auth.user.id,
       groupId: message.groupId,
       message: message.message,
     });

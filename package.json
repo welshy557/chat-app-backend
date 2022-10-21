@@ -8,8 +8,9 @@
   "scripts": {
     "dev": "nodemon --watch src --exec ts-node src/index.ts",
     "start": "ts-node src/index.ts",
-    "migrate:production": "cd src/db && knex migrate:rollback --env production && knex migrate:latest --env production && cd ../../",
-    "migrate:dev": "cd src/db && knex migrate:latest && cd ../../"
+    "migrate:production": "cd src/db && knex migrate:rollback --env production && knex migrate:latest --env production && knex seed:run --env production && cd ../../",
+    "migrate:dev": "cd src/db && knex migrate:latest && cd ../../",
+    "heroku-postbuild": "yarn migrate:production"
   },
   "dependencies": {
     "bcrypt": "^5.1.0",

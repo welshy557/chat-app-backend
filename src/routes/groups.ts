@@ -1,7 +1,7 @@
 import { Response, Router } from "express";
 import { ApiRequest } from "..";
 import db from "../db/db";
-import { Group, Message } from "../dbModels";
+import { Group, Message, User } from "../dbModels";
 import authenticateToken from "../routeMiddleware/auth-token";
 
 const groups = Router();
@@ -35,7 +35,31 @@ groups.get(
           return { ...group, messages: groupMessages ?? [] } as Group;
         });
 
-        return groupsWithMessages;
+        const groupsFriendsQuery = await Promise.all(
+          groupsWithMessages.map(
+            (group) =>
+              trx.raw(
+                `select * from users where id in (${
+                  group.friends.length > 0 ? group.friends : -1
+                })`
+              ) as any
+          )
+        );
+
+        const groupsFriends = groupsFriendsQuery.map(
+          ({ rows }) => rows
+        ) as User[][];
+
+        const groupsWithFriendsMessages = groupsWithMessages.map(
+          (group, index) => ({
+            ...group,
+            friends: groupsFriends[index].map((friend) => ({
+              ...friend,
+              password: undefined,
+            })),
+          })
+        );
+        return groupsWithFriendsMessages;
       });
       res.status(200).send(groups);
     } catch (err) {
@@ -90,25 +114,7 @@ groups.post(
 );
 
 groups.put(
-  "/groups/:id",
-  authenticateToken,
-  async (req: ApiRequest, res: Response) => {
-    try {
-      const id = parseInt(req.params.id);
-      const friendId = parseInt(req.body.friendId);
-
-      await db<Group>("groups")
-        .where({ id })
-        .update({ friends: db.raw("array_append(friends, ?)", [friendId]) });
-    } catch (err) {
-      console.error(err);
-      res.status(500).send(err);
-    }
-  }
-);
-
-groups.delete(
-  "/groups/remove-user/:groupId",
+  "/groups/add-user/:groupId",
   authenticateToken,
   async (req: ApiRequest, res: Response) => {
     try {
@@ -127,7 +133,45 @@ groups.delete(
 
         await trx<Group>("groups")
           .where({ id: parseInt(req.params.groupId) })
-          .update({ friends: [...group.friends, req.body.friendId] });
+          .update({ friends: [...group?.friends, ...req.body.ids] });
+      });
+
+      if (error) return;
+      res.status(200).send("Success");
+    } catch (err) {
+      console.error(err);
+      res.status(500).send(err);
+    }
+  }
+);
+
+groups.put(
+  "/groups/remove-user/:groupId",
+  authenticateToken,
+  async (req: ApiRequest, res: Response) => {
+    try {
+      let error = false;
+      await db.transaction(async (trx) => {
+        const group: Group | undefined = await trx<Group>("groups")
+          .first()
+          .where({ id: parseInt(req.params.groupId) });
+
+        if (!group) {
+          console.error(`Group with id ${req.params.groupId} not found`);
+          res.status(404).send(`Group with id ${req.params.groupId} not found`);
+          error = true;
+          return;
+        }
+        const newFriends = group.friends.filter(
+          (id) =>
+            !req.body.ids.some(
+              (removedId: number) => removedId === (id as unknown as number)
+            )
+        );
+
+        await trx<Group>("groups")
+          .where({ id: parseInt(req.params.groupId) })
+          .update({ friends: newFriends });
       });
 
       if (error) return;
