@@ -26,7 +26,9 @@ const app = express();
 const corsOptions = {
   origin: [
     "http://localhost:5173",
+    "http://127.0.0.1:5173",
     "https://main--elaborate-cajeta-7e14e8.netlify.app",
+    "https://elaborate-cajeta-7e14e8.netlify.app",
   ],
   credentials: true, //access-control-allow-credentials:true
   optionSuccessStatus: 200,
@@ -48,9 +50,8 @@ const io = new Server(server, {
     origin: [
       "http://localhost:5173",
       "http://127.0.0.1:5173",
-      "http://172.27.144.1:5173",
-      "http://192.168.2.16:5173",
       "https://main--elaborate-cajeta-7e14e8.netlify.app",
+      "https://elaborate-cajeta-7e14e8.netlify.app",
     ],
     methods: ["GET", "POST", "DELETE", "PUT"],
   },
