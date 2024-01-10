@@ -29,7 +29,5 @@ Scripts:
 - yarn heroku-postbuild - Used by Heroku to migrate the database after deploy.
 
 
-This backend service is hosted at: https://liamwelsh-chatapp-backend.herokuapp.com
-
 Repo for frontend of the app is located at: https://github.com/welshy557/chat-app-frontend
 
